@@ -12,27 +12,23 @@ export const LoginContext = createContext({
 });
 
 export default function LoginContextProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const userApi = useApi("users");
 
   useEffect(() => {
-    // Using this instead of API, had problems getting API to only keep a single
-    // user instead of continually adding to the table of logged in users
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      setIsAuthenticated(true);
-    } else {
-      localStorage.removeItem("user");
-      setIsAuthenticated(false);
-    }
-  }, [user]);
+    const fetchUser = async () => {
+      const storedUser = await userApi.getByField("isLoggedIn", true);
+      if (storedUser) {
+        setUser(storedUser);
+        setIsAuthenticated(true);
+      }
+    };
+    fetchUser();
+  }, []);
 
   async function handleLogin(userName, password) {
     setIsLoading(true);
@@ -41,7 +37,9 @@ export default function LoginContextProvider({ children }) {
     try {
       const user = await userApi.getByField("username", userName);
       if (user && user.password === password) {
-        setUser(user);
+        setUser({ ...user, isLoggedIn: true });
+        setIsAuthenticated(true);
+        await userApi.update(user.id, { ...user, isLoggedIn: true });
       } else {
         throw new Error("Invalid username or password");
       }
@@ -57,6 +55,7 @@ export default function LoginContextProvider({ children }) {
     setError(null);
 
     try {
+      await userApi.update(user.id, { ...user, isLoggedIn: false });
       setUser(null);
       setIsAuthenticated(false);
     } catch (err) {
@@ -76,7 +75,7 @@ export default function LoginContextProvider({ children }) {
         throw new Error("Username already taken");
       }
 
-      const newUser = { username: userName, password };
+      const newUser = { username: userName, password, isLoggedIn: false };
       const newUserId = await userApi.create(newUser);
       const createdUser = await userApi.getById(newUserId);
 
