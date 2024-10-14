@@ -1,9 +1,19 @@
+import { useState, useEffect } from "react";
 import { useApi } from "../../Api/api.js";
 import Header from "../../components/Header.jsx";
 
 export default function TodoList() {
   const taskApi = useApi("Tasks");
-  const tasks = taskApi.getAll();
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const allTasks = await taskApi.getAll();
+      setTasks(allTasks);
+    };
+
+    fetchTasks();
+  }, []);
 
   return (
     <>

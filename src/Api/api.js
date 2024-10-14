@@ -12,9 +12,17 @@
  * @example
  *
  * export const UserList = () => {
+ *   const [users, setUsers] = useState([]);
  *   const usersApi = useApi('users');
  *
- *   const users = usersApi.getAll();
+ *   useEffect(() => {
+ *     const fetchData = async () => {
+ *       const users = await usersApi.getAll();
+ *      setUsers(users);
+ *     };
+ *
+ *     fetchData();
+ *   }, []);
  *
  *   return (
  *     <div>
@@ -33,35 +41,51 @@ export const useApi = (tableName) => {
      * @returns {object[]}
      * @example
      * const usersApi = useApi('users');
-     * const users = usersApi.getAll();
+     * const users = await usersApi.getAll();
      * console.log(users);
      * // Output: [{ id: '24530789', name: 'John Doe' }]
      */
-    getAll: () => getFromLocalStorageDB(tableName) || [],
+    getAll: async () => {
+      return getFromLocalStorageDB(tableName) || [];
+    },
     /**
      * @param {string} id
      * @returns {object}
      * @example
      * const usersApi = useApi('users');
-     * const user = usersApi.getById('24530789');
+     * const user = await usersApi.getById('24530789');
      * console.log(user);
      * // Output: { id: '24530789', name: 'John Doe' }
      */
-    getById: (id) => {
+    getById: async (id) => {
       const data = getFromLocalStorageDB(tableName) || [];
       return data.find((d) => d.id === id);
+    },
+    /**
+     * @param {string} field
+     * @param {string} value
+     * @returns {object}
+     * @example
+     * const usersApi = useApi('users');
+     * const user = await usersApi.getByField('name', 'John Doe');
+     * console.log(user);
+     * // Output: { id: '24530789', name: 'John Doe' }
+     */
+    getByField: async (field, value) => {
+      const data = getFromLocalStorageDB(tableName) || [];
+      return data.find((d) => d[field] === value);
     },
     /**
      * @param {object} data
      * @example
      * const usersApi = useApi('users');
-     * const newId = usersApi.create({ name: 'John Doe' });
+     * const newId = await usersApi.create({ name: 'John Doe' });
      * console.log(usersApi.getAll());
      * console.log(newId);
      * // Output: [{ id: '24530789', name: 'John Doe' }]
      * // Output: '24530789'
      */
-    create: (data) => {
+    create: async (data) => {
       const id = String(Math.floor(Math.random() * 100000000));
       const items = getFromLocalStorageDB(tableName) || [];
       items.push({ id, ...data });
@@ -73,14 +97,14 @@ export const useApi = (tableName) => {
      * @param {object} data
      * @example
      * const usersApi = useApi('users');
-     * usersApi.create('24530789', { name: 'John Doe' });
+     * await usersApi.create('24530789', { name: 'John Doe' });
      * console.log(usersApi.getAll());
      * // Output: [{ id: '24530789', name: 'John Doe' }]
-     * usersApi.update('24530789', { name: 'Jane Doe' });
+     * await usersApi.update('24530789', { name: 'Jane Doe' });
      * console.log(usersApi.getAll());
      * // Output: [{ id: '24530789', name: 'Jane Doe' }]
      */
-    update: (id, data) => {
+    update: async (id, data) => {
       const items = getFromLocalStorageDB(tableName) || [];
       const index = items.findIndex((d) => d.id === id);
       items[index] = { id, ...data };
@@ -90,14 +114,14 @@ export const useApi = (tableName) => {
      * @param {string} id
      * @example
      * const usersApi = useApi('users');
-     * usersApi.create('24530789', { name: 'John Doe' });
+     * await usersApi.create('24530789', { name: 'John Doe' });
      * console.log(usersApi.getAll());
      * // Output: [{ id: '24530789', name: 'John Doe' }]
-     * usersApi.delete('24530789');
+     * await usersApi.delete('24530789');
      * console.log(usersApi.getAll());
      * // Output: []
      */
-    delete: (id) => {
+    delete: async (id) => {
       const items = getFromLocalStorageDB(tableName) || [];
       const newItems = items.filter((d) => d.id !== id);
       saveToLocalStorageDB(tableName, newItems);

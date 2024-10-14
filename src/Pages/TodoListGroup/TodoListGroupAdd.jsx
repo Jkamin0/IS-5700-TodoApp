@@ -7,9 +7,9 @@ export default function TodoListGroupAdd() {
   const todoApi = useApi("TodoLists");
   const [newTodoList, setNewTodoList] = useState("");
 
-  function addTodo() {
+  async function addTodo() {
     if (newTodoList) {
-      todoApi.create({ name: newTodoList });
+      await todoApi.create({ name: newTodoList });
       setNewTodoList("");
     }
   }

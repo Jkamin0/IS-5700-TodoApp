@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApi } from "../Api/api";
 import Header from "../components/Header";
 import Accordion from "@mui/material/Accordion";
@@ -8,16 +8,29 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 export default function Home() {
   const todoApi = useApi("TodoLists");
   const taskApi = useApi("Tasks");
-  const todoLists = todoApi.getAll();
-  const [tasks, setTasks] = useState(taskApi.getAll());
+  const [todoLists, setTodoLists] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
-  function toggleTaskCompletion(taskId) {
+  useEffect(() => {
+    const fetchData = async () => {
+      const todoListsData = await todoApi.getAll();
+      const tasksData = await taskApi.getAll();
+
+      setTodoLists(todoListsData);
+      setTasks(tasksData);
+      console.log("Hello There!");
+    };
+
+    fetchData();
+  }, []);
+
+  async function toggleTaskCompletion(taskId) {
     const updatedTasks = tasks.map((task) =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
     );
 
     const taskToUpdate = updatedTasks.find((task) => task.id === taskId);
-    taskApi.update(taskId, { ...taskToUpdate });
+    await taskApi.update(taskId, { ...taskToUpdate });
     setTasks(updatedTasks);
   }
 

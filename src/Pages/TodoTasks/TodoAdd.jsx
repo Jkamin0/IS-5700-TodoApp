@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApi } from "../../Api/api.js";
 import Header from "../../components/Header.jsx";
 import {
@@ -16,12 +16,20 @@ export default function TodoAdd() {
   const todoApi = useApi("TodoLists");
   const [taskName, setTaskName] = useState("");
   const [selectedListId, setSelectedListId] = useState("");
+  const [todoLists, setTodoLists] = useState([]);
 
-  const todoLists = todoApi.getAll();
+  useEffect(() => {
+    const fetchTodoLists = async () => {
+      const lists = await todoApi.getAll();
+      setTodoLists(lists);
+    };
 
-  function addTask() {
+    fetchTodoLists();
+  }, []);
+
+  async function addTask() {
     if (taskName && selectedListId) {
-      taskApi.create({
+      await taskApi.create({
         name: taskName,
         listId: selectedListId,
         completed: false,

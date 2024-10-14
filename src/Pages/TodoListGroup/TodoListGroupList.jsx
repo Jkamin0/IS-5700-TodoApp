@@ -1,9 +1,19 @@
+import { useState, useEffect } from "react";
 import { useApi } from "../../Api/api.js";
 import Header from "../../components/Header.jsx";
 
 export default function TodoListGroupList() {
   const todoApi = useApi("TodoLists");
-  const todoLists = todoApi.getAll();
+  const [todoLists, setTodoLists] = useState([]);
+
+  useEffect(() => {
+    const fetchTodoLists = async () => {
+      const lists = await todoApi.getAll();
+      setTodoLists(lists);
+    };
+
+    fetchTodoLists();
+  }, []);
 
   return (
     <>

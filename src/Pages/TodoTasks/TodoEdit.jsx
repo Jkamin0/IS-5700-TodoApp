@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApi } from "../../Api/api.js";
 import Header from "../../components/Header.jsx";
 import {
@@ -15,17 +15,28 @@ export default function TodoEdit() {
   const [selectedTask, setSelectedTask] = useState(null);
   const taskApi = useApi("Tasks");
   const todoApi = useApi("TodoLists");
-  const tasks = taskApi.getAll();
-  const todoLists = todoApi.getAll();
+  const [tasks, setTasks] = useState([]);
+  const [todoLists, setTodoLists] = useState([]);
 
-  function handleSelect(taskId) {
-    const task = taskApi.getById(taskId);
+  useEffect(() => {
+    const fetchData = async () => {
+      const allTasks = await taskApi.getAll();
+      const allTodoLists = await todoApi.getAll();
+      setTasks(allTasks);
+      setTodoLists(allTodoLists);
+    };
+
+    fetchData();
+  }, []);
+
+  async function handleSelect(taskId) {
+    const task = await taskApi.getById(taskId);
     setSelectedTask(task);
   }
 
-  function handleUpdate() {
+  async function handleUpdate() {
     if (selectedTask) {
-      taskApi.update(selectedTask.id, {
+      await taskApi.update(selectedTask.id, {
         name: selectedTask.name,
         listId: selectedTask.listId,
         completed: selectedTask.completed,
