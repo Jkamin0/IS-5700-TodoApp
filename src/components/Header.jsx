@@ -12,6 +12,14 @@ export default function Header() {
           </p>
           <p>
             <Link
+              to="/authenticate"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              Authenticate
+            </Link>
+          </p>
+          <p>
+            <Link
               to="/TodoListGroupList"
               className="text-blue-500 hover:text-blue-700"
             >
