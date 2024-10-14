@@ -18,7 +18,6 @@ export default function Home() {
 
       setTodoLists(todoListsData);
       setTasks(tasksData);
-      console.log("Hello There!");
     };
 
     fetchData();
